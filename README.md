@@ -1,6 +1,6 @@
 # 🧠 Neural Network Engine
 
-**Autora:** Claudia  
+**Autora:** Claudia Álvarez González y Kimberly Casimiro Torres 
 **Universidad de Las Palmas de Gran Canaria (ULPGC)**  
 **Proyecto Final:** Neural Network Engine — Implementación completa de un motor de redes neuronales desde cero  
 **Lenguaje:** Python  
