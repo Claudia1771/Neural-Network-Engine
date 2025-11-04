@@ -1,15 +1,14 @@
-# 🧠 Neural Network Engine
+# Neural Network Engine
 
-**Autora:** Claudia Álvarez González y Kimberly Casimiro Torres 
+**Autora:** Claudia Álvarez González y Kimberly Casimiro Torres  
 **Universidad de Las Palmas de Gran Canaria (ULPGC)**  
-**Proyecto Final:** Neural Network Engine — Implementación completa de un motor de redes neuronales desde cero  
 **Lenguaje:** Python  
 **Entorno de trabajo:** Visual Studio Code  
 **Repositorio:** [GitHub - Neural Network Engine](https://github.com/Claudia1771/Neural-Network-Engine)
 
 ---
 
-## 📘 Descripción general
+## Descripción
 
 Este proyecto consiste en la **implementación integral y modular de un motor de redes neuronales completamente desde cero**, utilizando exclusivamente **NumPy** y sin apoyo de frameworks de deep learning.  
 
@@ -20,37 +19,44 @@ El motor se valida mediante **dos experimentos principales** (Iris y MNIST), y s
 
 ---
 
-## 🧩 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 Neural-Network-Engine/
 │
+├── data/
+│ ├── iris/
+│ │ └── iris.csv
+│ └── mnist/
+│   ├── train-images-idx3-ubyte.gz
+│   ├── train-labels-idx1-ubyte.gz
+│   ├── t10k-images-idx3-ubyte.gz
+│   └── t10k-labels-idx1-ubyte.gz
 ├── src/
 │   ├── layers.py
 │   ├── losses.py
 │   ├── network.py
 │   ├── optimizers.py
-│   ├── utils.py
-│   └── __init__.py
+│   └── utils.py
 │
 ├── notebooks/
 │   ├── demo_iris.ipynb
 │   └── experiment_mnist.ipynb
 │
 ├── results/
-│   ├── iris_loss.png
 │   ├── iris_acc.png
 │   ├── iris_confusion.png
-│   ├── mnist_loss.png
+│   ├── iris_loss.png
+│   ├── iris_samples.png
 │   ├── mnist_acc.png
-│   └── mnist_confusion.png
+│   ├── mnist_confusion.png
+│   ├── mnist_loss.png
+│   ├── mnist_predictions.png
+│   └── mnist_samples.png
 │
 ├── tests/
+│   ├── test_gradcheck.ipynb
 │   └── unit_tests.py
-│
-├── data/
-│   ├── iris/iris.csv
-│   └── mnist/*.gz
 │
 ├── requirements.txt
 └── README.md
@@ -60,9 +66,11 @@ Cada archivo cumple una función específica, garantizando **una separación tot
 
 ---
 
-## ⚙️ Descripción técnica por módulos
+## Descripción por módulos
 
-### 🧱 `layers.py` — Capas y activaciones
+### `src`
+
+####  `layers.py` — Capas y activaciones
 
 Define la estructura base de toda red neuronal. Incluye:
 
@@ -78,9 +86,8 @@ Define la estructura base de toda red neuronal. Incluye:
 
 Estas capas implementan tanto **`forward()`** como **`backward()`**, permitiendo el cálculo manual del gradiente en toda la red.
 
----
 
-### 🧮 `losses.py` — Funciones de pérdida
+#### `losses.py` — Funciones de pérdida
 
 Mide la discrepancia entre la predicción y la realidad.
 
@@ -91,9 +98,8 @@ Cada función define:
 - `forward(y_pred, y_true)`: cálculo de pérdida.  
 - `backward(y_pred, y_true)`: gradiente para retropropagación.
 
----
 
-### 🔧 `optimizers.py` — Métodos de optimización
+#### `optimizers.py` — Métodos de optimización
 
 Implementa los principales algoritmos para actualizar los pesos de la red:
 
@@ -103,17 +109,16 @@ Implementa los principales algoritmos para actualizar los pesos de la red:
 
 Cada optimizador implementa el método `step(params, grads)` que actualiza los pesos de manera independiente para cada parámetro.
 
----
 
-### 🧠 `network.py` — Núcleo y entrenador
+#### `network.py` — Núcleo y entrenador
 
-#### Clase `NeuralNetwork`
+##### Clase `NeuralNetwork`
 Coordina todas las capas, calculando el flujo completo:
 1. **Forward pass**: secuencialmente por todas las capas.
 2. **Backward pass**: retropropaga los gradientes hacia las capas previas.
 3. **Persistencia**: permite guardar y cargar pesos (`save`, `load`).
 
-#### Clase `Trainer`
+##### Clase `Trainer`
 Gestiona el ciclo completo de entrenamiento:
 - **Mini-batches**
 - **Evaluación por épocas**
@@ -124,9 +129,8 @@ Gestiona el ciclo completo de entrenamiento:
 
 Incluye salida visual y restauración automática del mejor modelo encontrado durante el entrenamiento.
 
----
 
-### 🧰 `utils.py` — Utilidades y métricas
+#### `utils.py` — Utilidades y métricas
 
 Incluye funciones para:
 - Carga y preprocesamiento de **Iris** y **MNIST**.  
@@ -140,7 +144,9 @@ Todo el sistema está preparado para reproducibilidad mediante `set_seed()`.
 
 ---
 
-### 🧪 `tests/unit_tests.py` — Validación
+### `tests`
+
+#### `unit_tests.py` — Validación
 
 Incluye pruebas de:
 - **GradCheck**: verificación numérica de gradientes mediante diferencias finitas.
@@ -148,11 +154,22 @@ Incluye pruebas de:
 
 El resultado esperado muestra un gradiente coherente (`rel_error < 5e-2`) y una pérdida final mucho menor que la inicial.
 
+
+#### `test_gradcheck.ipynb` — Verificación numérica de gradientes
+
+Notebook diseñado para validar la implementación matemática del backpropagation.
+Evalúa la consistencia entre los gradientes analíticos (calculados por la red) y los numéricos (obtenidos por diferencias finitas) en dos escenarios:
+
+- **Clasificación multiclase (CrossEntropyLoss):** compara gradientes en redes pequeñas de clasificación.
+- **Regresión continua (MSELoss):** valida el cálculo en redes con salidas reales.
+
+El test confirma que los gradientes analíticos y numéricos coinciden dentro de una tolerancia relativa, garantizando que la retropropagación está correctamente implementada en todas las capas.
+
 ---
 
-## 🔬 Experimentos y resultados
+## Experimentos y resultados
 
-### 🌸 Experimento 1 — *Iris Dataset*
+### Experimento 1 — *Dataset Iris*
 
 **Arquitectura del modelo:**
 ```python
@@ -175,9 +192,9 @@ NeuralNetwork([
 **Resultados:**
 | Métrica | Valor |
 |----------|--------|
-| Train Accuracy | 97.14 % |
+| Train Accuracy | 93.33 % |
 | Test Accuracy | 100 % |
-| Pérdida final | 0.017 |
+| Épocas ejecutadas | 193 |
 
 **Análisis:**  
 El modelo converge rápidamente, alcanzando una clasificación perfecta en el conjunto de prueba. Las curvas de pérdida y precisión muestran una mejora constante sin sobreajuste.  
@@ -194,7 +211,7 @@ El modelo converge rápidamente, alcanzando una clasificación perfecta en el co
 
 ---
 
-### 🔢 Experimento 2 — *MNIST Dataset*
+### Experimento 2 — *Dataset MNIST*
 
 **Arquitectura del modelo:**
 ```python
@@ -239,7 +256,7 @@ El modelo logra una precisión excelente con una generalización sólida. Las cu
 
 ---
 
-### 📊 Comparativa entre modelos
+### Comparativa entre modelos
 
 | Característica | Iris | MNIST |
 |----------------|------|--------|
@@ -255,7 +272,7 @@ Ambos experimentos demuestran que el motor puede **adaptarse tanto a problemas s
 
 ---
 
-## 🧪 Funcionalidades destacadas
+## Funcionalidades destacadas
 
 - Implementación **manual y verificable** de *forward* y *backward propagation*.
 - **Optimización adaptativa (Adam, RMSProp, SGD)**.  
@@ -268,7 +285,7 @@ Ambos experimentos demuestran que el motor puede **adaptarse tanto a problemas s
 
 ---
 
-## 🚀 Ejecución del proyecto
+## Ejecución del proyecto
 
 ```bash
 git clone https://github.com/Claudia1771/Neural-Network-Engine.git
@@ -289,10 +306,31 @@ python tests/unit_tests.py
 
 ---
 
-## 🧩 Conclusión
+## Extensiones y mejoras implementadas
 
-El proyecto **Neural Network Engine** representa una implementación completa, optimizada y educativa de un motor de redes neuronales moderno.  
-Reproduce con precisión los fundamentos matemáticos y computacionales de los frameworks reales, pero con un nivel de **transparencia, control y comprensión total del proceso de aprendizaje**.  
+Además de las funcionalidades básicas, el motor integra una serie de mejoras técnicas que amplían su rendimiento y flexibilidad:
 
-Los resultados en Iris y MNIST confirman la **eficiencia, escalabilidad y robustez** del motor, consolidándolo como un trabajo sólido, bien estructurado y con aplicación práctica en entornos académicos y de investigación.
+- Soporte para múltiples **optimizadores avanzados** (SGD, RMSProp, Adam).  
+- **Regularización** mediante Dropout y Weight Decay.  
+- **Inicialización de pesos avanzada** (He y Xavier).  
+- **Gestión dinámica de la tasa de aprendizaje** con Step Decay y Cosine Annealing.  
+- **Early Stopping automático** basado en la evolución de la pérdida de validación.  
+- **Verificación de gradientes (GradCheck)** para validar la consistencia numérica.  
+- **Funciones de activación extendidas** (ReLU, Sigmoid, Tanh, Softmax).  
+- **Visualización automática** de métricas, curvas y matrices de confusión.  
+- **Pruebas unitarias** y soporte para distintos datasets (Iris, MNIST).  
 
+Estas mejoras refuerzan la calidad y la fiabilidad del sistema, garantizando un entrenamiento estable, resultados reproducibles y un control total sobre cada etapa del aprendizaje.
+
+---
+
+
+## Conclusión
+
+El proyecto demuestra el desarrollo completo de un motor de redes neuronales totalmente funcional, construido desde cero con un diseño modular, limpio y extensible.
+Durante el proceso se han implementado todos los componentes esenciales que permiten definir, entrenar, evaluar y optimizar redes neuronales densas, gestionando cada etapa del flujo de aprendizaje de manera controlada y transparente.
+
+El sistema integra desde el forward y backward propagation hasta la gestión automática de optimización, regularización y parada temprana, mostrando una ejecución estable y resultados muy sólidos tanto en el dataset Iris como en MNIST.
+Los experimentos realizados evidencian una convergencia rápida, alto rendimiento y ausencia de sobreajuste, lo que confirma que el motor no solo cumple su propósito técnico, sino que ofrece fiabilidad y precisión en entornos reales.
+
+El código se organiza de forma clara, separando lógica, experimentos y visualización. La estructura modular facilita la ampliación del sistema y su reutilización en nuevos contextos, destacando por su calidad y coherencia global.
