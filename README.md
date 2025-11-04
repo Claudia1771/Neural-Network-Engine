@@ -47,12 +47,10 @@ Neural-Network-Engine/
 │   ├── iris_acc.png
 │   ├── iris_confusion.png
 │   ├── iris_loss.png
-│   ├── iris_samples.png
 │   ├── mnist_acc.png
 │   ├── mnist_confusion.png
 │   ├── mnist_loss.png
-│   ├── mnist_predictions.png
-│   └── mnist_samples.png
+│   └── mnist_predictions.png
 │
 ├── tests/
 │   ├── test_gradcheck.ipynb
