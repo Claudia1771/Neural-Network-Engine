@@ -146,12 +146,63 @@ Todo el sistema está preparado para reproducibilidad mediante `set_seed()`.
 
 #### `unit_tests.py` — Validación
 
-Incluye pruebas de:
-- **GradCheck**: verificación numérica de gradientes mediante diferencias finitas.
-- **Entrenamiento miniatura**: una red XOR que confirma convergencia real (disminución progresiva de la pérdida).  
+Incluye **pruebas unitarias** que demuestran el correcto funcionamiento de los métodos principales del motor. En concreto, se verifican los siguientes métodos:
 
-El resultado esperado muestra un gradiente coherente (`rel_error < 5e-2`) y una pérdida final mucho menor que la inicial.
+- **Capas**
+  - `Dense.forward`, `Dense.backward`, `Dense.params`, `Dense.grads`
 
+- **Funciones de activación**
+  - `Sigmoid.forward`, `Sigmoid.backward`
+  - `Tanh.forward`, `Tanh.backward`
+  - `ReLU.forward`, `ReLU.backward`
+  - `Softmax.forward`, `Softmax.backward`
+
+- **Funciones de pérdida**
+  - `MSELoss.forward`, `MSELoss.backward`
+  - `CrossEntropyLoss.forward`, `CrossEntropyLoss.backward` (tanto con etiquetas como con one-hot)
+
+- **Regularización**
+  - `Dropout.forward`, `Dropout.backward` (comportamiento en entrenamiento y en evaluación)
+
+- **Optimizadores**
+  - `SGD.step` (incluye momentum)
+  - `RMSProp.step`
+  - `Adam.step` (incluye validación del comportamiento con `weight_decay`)
+
+- **Schedulers (learning rate)**
+  - `step_decay`
+  - `cosine_annealing`
+
+- **Red secuencial**
+  - `NeuralNetwork.forward`, `NeuralNetwork.backward`, `NeuralNetwork.params`, `NeuralNetwork.grads`
+
+- **Entrenamiento**
+  - `Trainer.train` (incluye comprobación de activación de **early stopping**)
+
+- **Utilidades**
+  - `utils.train_val_test_split`
+  - `utils.batch_iterator`
+  - `utils.one_hot`
+
+Además, las pruebas comprueban:
+- coherencia de dimensiones (`shapes`) en forward/backward,
+- consistencia entre parámetros y gradientes,
+- estabilidad numérica (valores finitos),
+- actualización real de parámetros por los optimizadores,
+- funcionamiento esperado de dropout, schedulers y entrenamiento.
+
+**Evidencia de funcionamiento:**  
+La correcta ejecución del archivo se verifica ejecutando:
+
+```bash
+python tests/unit_tests.py
+```
+
+El resultado esperado es que todas las pruebas finalicen correctamente y se muestre un mensaje final de validación:
+
+```
+Todas las pruebas unitarias se han superado correctamente. Los métodos principales del motor han sido validados.
+```
 
 #### `test_gradcheck.ipynb` — Verificación numérica de gradientes
 

@@ -4,15 +4,16 @@ import gzip
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
 from typing import Tuple, Dict, List, Optional, Iterable
 
-# Reproducibilidad
+# ---- Reproducibilidad ----
 def set_seed(seed: int = 42) -> None:
+    """Fija semillas para reproducibilidad."""
     random.seed(seed)
     np.random.seed(seed)
 
-# One-hot y métricas
+# ---- One-hot y métricas ----
+
 def one_hot(y: np.ndarray, num_classes: Optional[int] = None) -> np.ndarray:
     y = y.astype(int).ravel()
     if num_classes is None:
@@ -23,21 +24,22 @@ def one_hot(y: np.ndarray, num_classes: Optional[int] = None) -> np.ndarray:
 
 
 def accuracy(y_pred_logits: np.ndarray, y_true: np.ndarray) -> float:
+    """Accuracy a partir de logits."""
     y_pred = np.argmax(y_pred_logits, axis=1)
     y_true = y_true.ravel()
     return float((y_pred == y_true).mean())
 
 
-def confusion_matrix(
-    y_pred_logits: np.ndarray, y_true: np.ndarray, num_classes: int
-) -> np.ndarray:
+def confusion_matrix(y_pred_logits: np.ndarray, y_true: np.ndarray, num_classes: int) -> np.ndarray:
+    """Matriz de confusión."""
     y_pred = np.argmax(y_pred_logits, axis=1)
     cm = np.zeros((num_classes, num_classes), dtype=int)
     for yt, yp in zip(y_true.ravel(), y_pred):
         cm[int(yt), int(yp)] += 1
     return cm
 
-# Particiones y mini-batches
+# ---- Particiones y mini-batches ----
+
 def train_val_test_split(
     X: np.ndarray,
     y: np.ndarray,
@@ -47,35 +49,44 @@ def train_val_test_split(
     seed: int = 42,
     shuffle: bool = True,
 ):
+    """Divide el dataset en train/val/test."""
     assert abs(train_size + val_size + test_size - 1.0) < 1e-6, "Las particiones deben sumar 1.0"
+    
     n = X.shape[0]
     idx = np.arange(n)
+    
     if shuffle:
         rng = np.random.RandomState(seed)
         rng.shuffle(idx)
+    
     n_train = int(n * train_size)
     n_val = int(n * val_size)
+    
     tr_idx = idx[:n_train]
     va_idx = idx[n_train:n_train + n_val]
     te_idx = idx[n_train + n_val:]
+    
     return (X[tr_idx], y[tr_idx]), (X[va_idx], y[va_idx]), (X[te_idx], y[te_idx])
 
 
-def batch_iterator(
-    X: np.ndarray, y: np.ndarray, batch_size: int, shuffle: bool = True, seed: int = 42
-):
+def batch_iterator(X: np.ndarray, y: np.ndarray, batch_size: int, shuffle: bool = True, seed: int = 42):
+    """Iterador simple de mini-batches."""
     n = X.shape[0]
     indices = np.arange(n)
+
     if shuffle:
         rng = np.random.RandomState(seed)
         rng.shuffle(indices)
+
     for start in range(0, n, batch_size):
         end = min(start + batch_size, n)
         idx = indices[start:end]
         yield X[idx], y[idx]
 
-# Normalizaciones
+# ---- Normalizaciones ----
+
 def normalize_01(X: np.ndarray) -> np.ndarray:
+    """Escala a rango [0,1]."""
     X = X.astype(np.float32)
     mn, mx = X.min(), X.max()
     if mx - mn < 1e-12:
@@ -84,11 +95,13 @@ def normalize_01(X: np.ndarray) -> np.ndarray:
 
 
 def standardize(X: np.ndarray, eps: float = 1e-8) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Estandariza (media 0, varianza 1)."""
     mu = X.mean(axis=0, keepdims=True)
     sd = X.std(axis=0, keepdims=True) + eps
     return (X - mu) / sd, mu, sd
 
-# MNIST: carga local desde data/mnist/*.gz
+# ---- MNIST (carga local desde data/mnist/*.gz) ----
+
 def _load_idx_images(path: str) -> np.ndarray:
     with gzip.open(path, "rb") as f:
         data = np.frombuffer(f.read(), np.uint8, offset=16)
@@ -102,6 +115,7 @@ def _load_idx_labels(path: str) -> np.ndarray:
 
 
 def load_mnist(mnist_dir: str = "data/mnist"):
+    """Carga MNIST desde archivos .gz locales."""
     req = [
         "train-images-idx3-ubyte.gz",
         "train-labels-idx1-ubyte.gz",
@@ -121,10 +135,12 @@ def load_mnist(mnist_dir: str = "data/mnist"):
     y_test  = _load_idx_labels(os.path.join(mnist_dir, req[3]))
     return (X_train, y_train), (X_test, y_test)
 
-# IRIS: carga local desde data/iris/iris.csv
+# ---- IRIS (carga local desde data/iris/iris.csv) ----
+
 _IRIS_CLASSES = {"Iris-setosa": 0, "Iris-versicolor": 1, "Iris-virginica": 2}
 
 def load_iris(iris_dir: str = "data/iris", filename: str = "iris.csv"):
+    """Carga IRIS desde un CSV local."""
     csv_path = os.path.join(iris_dir, filename)
     if not os.path.exists(csv_path):
         raise FileNotFoundError(
@@ -132,6 +148,7 @@ def load_iris(iris_dir: str = "data/iris", filename: str = "iris.csv"):
         )
 
     X_list, y_list = [], []
+
     with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -154,9 +171,10 @@ def load_iris(iris_dir: str = "data/iris", filename: str = "iris.csv"):
     y = np.array(y_list, dtype=np.int64)
     return X, y
 
-# Visualización de curvas de entrenamiento
+# ---- Curvas de entrenamiento ----
+
 def plot_curves(history: Dict[str, List[float]]) -> None:
-    # Loss
+    """Dibuja loss y accuracy."""
     plt.figure()
     plt.plot(history["train_loss"], label="train_loss")
     if "val_loss" in history:
@@ -168,7 +186,6 @@ def plot_curves(history: Dict[str, List[float]]) -> None:
     plt.grid(True)
     plt.show()
 
-    # Accuracy
     if "train_acc" in history:
         plt.figure()
         plt.plot(history["train_acc"], label="train_acc")
